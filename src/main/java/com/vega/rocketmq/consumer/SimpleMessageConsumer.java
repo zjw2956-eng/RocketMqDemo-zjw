@@ -1,6 +1,9 @@
 package com.vega.rocketmq.consumer;
 
 import com.vega.rocketmq.common.RocketMqConstant;
+
+import lombok.extern.slf4j.Slf4j;
+
 import org.apache.rocketmq.spring.annotation.RocketMQMessageListener;
 import org.apache.rocketmq.spring.core.RocketMQListener;
 import org.springframework.stereotype.Component;
@@ -26,6 +29,7 @@ import org.springframework.stereotype.Component;
  *
  * @author Vega.z
  */
+@Slf4j
 @Component
 @RocketMQMessageListener(
         topic = RocketMqConstant.TOPIC_SIMPLE,
@@ -49,8 +53,9 @@ public class SimpleMessageConsumer implements RocketMQListener<String> {
      */
     @Override
     public void onMessage(String message) {
-        // TODO: 实现消息消费逻辑
+        // 实现消息消费逻辑
         // 提示：RocketMQ 自动提交 offset，无需手动 ack
         // 提示：处理失败直接抛异常即可触发重试
+        log.info("收到普通消息：{}", message);
     }
 }

@@ -1,10 +1,14 @@
 package com.vega.rocketmq.producer;
 
 import org.apache.rocketmq.client.producer.SendCallback;
+import org.apache.rocketmq.client.producer.SendResult;
 import org.apache.rocketmq.spring.core.RocketMQTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.Message;
+import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.stereotype.Component;
+
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * 普通消息生产者 —— 三种发送方式
@@ -24,6 +28,7 @@ import org.springframework.stereotype.Component;
  * @author Vega.z
  */
 @Component
+@Slf4j
 public class SimpleMessageProducer {
 
     @Autowired
@@ -45,10 +50,12 @@ public class SimpleMessageProducer {
      * @return 发送结果，包含 msgId、queue 等信息
      */
     public void syncSend(String topic, String tag, String message) {
-        // TODO: 使用 rocketMQTemplate.syncSend() 实现同步发送
+        //同步发送
         // 提示：destination 格式为 topic + ":" + tag
         // 返回值 SendResult 包含 msgId、sendStatus、messageQueue 等信息
-        throw new UnsupportedOperationException("TODO: 实现同步发送逻辑");
+        String destination = topic + ":" + tag;
+        SendResult result = rocketMQTemplate.syncSend(destination, message);
+        log.info("同步发送成功，msgId={}, topic={}, message={}", result.getMsgId(), topic, message);
     }
 
     /**
@@ -65,9 +72,21 @@ public class SimpleMessageProducer {
      * @param message 消息内容
      */
     public void asyncSend(String topic, String tag, String message) {
-        // TODO: 使用 rocketMQTemplate.asyncSend() 实现异步发送
+        // 使用 rocketMQTemplate.asyncSend() 实现异步发送
         // 提示：需要实现 SendCallback 接口
-        throw new UnsupportedOperationException("TODO: 实现异步发送逻辑");
+        String destination = topic + ":" + tag;
+        rocketMQTemplate.asyncSend(destination, message, new SendCallback() {
+            @Override
+            public void onSuccess(SendResult sendResult) {
+                log.info("异步发送成功,msg={},queue={}", sendResult.getMsgId(), sendResult.getMessageQueue());
+            }
+
+            @Override
+            public void onException(Throwable e) {
+                log.error("异步发送失败,message={}", message, e);
+            }
+        });
+        log.info("异步发送已提交，不等待结果");
     }
 
     /**
@@ -80,9 +99,11 @@ public class SimpleMessageProducer {
      * @param message 消息内容
      */
     public void sendOneWay(String topic, String tag, String message) {
-        // TODO: 使用 rocketMQTemplate.sendOneWay() 实现单向发送
+        // 使用 rocketMQTemplate.sendOneWay() 实现单向发送
         // 提示：这个方法没有返回值
-        throw new UnsupportedOperationException("TODO: 实现单向发送逻辑");
+        String destination = topic + ":" + tag;
+        rocketMQTemplate.sendOneWay(destination, message);
+        log.info("单向发送完成（不保证送达），topic={}, message={}", topic, message);
     }
 
     /**
@@ -96,8 +117,12 @@ public class SimpleMessageProducer {
      * @param <T>     对象类型
      */
     public <T> void syncSendObject(String topic, String tag, T payload) {
-        // TODO: 使用 rocketMQTemplate.syncSend() + MessageBuilder 发送对象
+        // 使用 rocketMQTemplate.syncSend() + MessageBuilder 发送对象
         // 提示：使用 MessageBuilder.withPayload(payload).setHeader(...).build()
-        throw new UnsupportedOperationException("TODO: 实现对象发送逻辑");
+        String destination = topic + ":" + tag;
+        Message<T> msg = MessageBuilder.withPayload(payload).build();
+        rocketMQTemplate.syncSend(destination, msg);
+        log.info("对象发送成功，type={}, payload={}",
+                payload.getClass().getSimpleName(), payload);
     }
 }

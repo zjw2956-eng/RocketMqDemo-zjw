@@ -1,6 +1,9 @@
 package com.vega.rocketmq.consumer;
 
 import com.vega.rocketmq.common.RocketMqConstant;
+
+import lombok.extern.slf4j.Slf4j;
+
 import org.apache.rocketmq.spring.annotation.ConsumeMode;
 import org.apache.rocketmq.spring.annotation.RocketMQMessageListener;
 import org.apache.rocketmq.spring.core.RocketMQListener;
@@ -31,6 +34,7 @@ import org.springframework.stereotype.Component;
  *
  * @author Vega.z
  */
+@Slf4j
 @Component
 @RocketMQMessageListener(
         topic = RocketMqConstant.TOPIC_ORDERLY,
@@ -50,8 +54,9 @@ public class OrderlyMessageConsumer implements RocketMQListener<String> {
      */
     @Override
     public void onMessage(String message) {
-        // TODO: 实现顺序消费逻辑
+        // 实现顺序消费逻辑
         // 提示：同一个 MessageQueue 的消息是单线程消费，不用担心线程安全问题
         // 提示：处理失败抛异常会触发重试，重试期间该队列后续消息会被阻塞
+        log.info("顺序消费收到消息：{}", message);
     }
 }
