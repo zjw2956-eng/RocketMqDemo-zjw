@@ -1,8 +1,12 @@
 package com.vega.rocketmq.producer;
 
+import org.apache.rocketmq.client.producer.SendResult;
+import org.apache.rocketmq.common.message.Message;
 import org.apache.rocketmq.spring.core.RocketMQTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * 延时消息生产者
@@ -35,6 +39,7 @@ import org.springframework.stereotype.Component;
  *
  * @author Vega.z
  */
+@Slf4j
 @Component
 public class DelayMessageProducer {
 
@@ -61,10 +66,16 @@ public class DelayMessageProducer {
      * @param delayTimeLevel 延时级别（1-18），见类注释中的映射表
      */
     public void sendDelayMessage(String topic, String tag, String message, int delayTimeLevel) {
-        // TODO: 使用 RocketMQ 延时消息功能发送
+        // 使用 RocketMQ 延时消息功能发送
         // 提示1：不能直接 syncSend(topic:tag, msg)，需要构造 Message 对象设置延迟级别
         // 提示2：rocketMQTemplate.syncSend() 的重载版本接受 org.apache.rocketmq.common.message.Message
         // 提示3：Message.setDelayTimeLevel(delayTimeLevel) 设置延时级别
-        throw new UnsupportedOperationException("TODO: 实现延时消息发送逻辑");
+        String destination = topic + ":" + tag;
+        //构造RocketMQ原生Message对象
+        Message msg=new Message(topic, tag, message.getBytes());
+        msg.setDelayTimeLevel(delayTimeLevel);
+        //注意：syncSend参数是topic:tag和Message,不是String
+        SendResult result=rocketMQTemplate.syncSend(destination, msg);
+        log.info("延时消息发送成功，delayLevel={}, msgId={}", delayTimeLevel, result.getMsgId());
     }
 }

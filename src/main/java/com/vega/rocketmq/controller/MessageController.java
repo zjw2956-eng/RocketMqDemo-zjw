@@ -122,8 +122,13 @@ public class MessageController {
      */
     @PostMapping("/transaction")
     public String sendTransactionMessage(@RequestBody String message) {
-        // TODO: 调用 transactionMessageProducer.sendTransactionMessage() 发送事务消息
-        throw new UnsupportedOperationException("TODO: 发送事务消息");
+        // 调用 transactionMessageProducer.sendTransactionMessage() 发送事务消息
+        transactionMessageProducer.sendTransactionMessage(
+                RocketMqConstant.TOPIC_TRANSACTION,
+                RocketMqConstant.TAG_DEFAULT,
+                message,
+                message);
+        return "事务消息已发送：" + message;
     }
 
     // ==================== 延时消息 ====================
@@ -152,7 +157,19 @@ public class MessageController {
     @PostMapping("/delay")
     public String sendDelayMessage(@RequestBody String message,
             @RequestParam(defaultValue = "3") int delayLevel) {
-        // TODO: 调用 delayMessageProducer.sendDelayMessage() 发送延时消息
-        throw new UnsupportedOperationException("TODO: 发送延时消息");
+        // 调用 delayMessageProducer.sendDelayMessage() 发送延时消息
+        delayMessageProducer.sendDelayMessage(
+                RocketMqConstant.TOPIC_DELAY,
+                RocketMqConstant.TAG_DEFAULT,
+                message,
+                delayLevel);
+        return "延时消息发送成功，delayLevel=" + delayLevel + "（" + getDelayDesc(delayLevel) + "）";
+    }
+
+    // 可选：把延时级别翻译成中文，返回提示更友好
+    private String getDelayDesc(int level) {
+        String[] desc = { "", "1s", "5s", "10s", "30s", "1m", "2m", "3m", "4m", "5m",
+                "6m", "7m", "8m", "9m", "10m", "20m", "30m", "1h", "2h" };
+        return level >= 1 && level <= 18 ? desc[level] : "未知";
     }
 }

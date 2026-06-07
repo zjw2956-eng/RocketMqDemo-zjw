@@ -1,6 +1,9 @@
 package com.vega.rocketmq.consumer;
 
 import com.vega.rocketmq.common.RocketMqConstant;
+
+import lombok.extern.slf4j.Slf4j;
+
 import org.apache.rocketmq.spring.annotation.MessageModel;
 import org.apache.rocketmq.spring.annotation.RocketMQMessageListener;
 import org.apache.rocketmq.spring.core.RocketMQListener;
@@ -25,6 +28,7 @@ import org.springframework.stereotype.Component;
  *
  * @author Vega.z
  */
+@Slf4j
 @Component
 @RocketMQMessageListener(
         topic = RocketMqConstant.TOPIC_SIMPLE,
@@ -43,8 +47,9 @@ public class BroadcastConsumer implements RocketMQListener<String> {
      */
     @Override
     public void onMessage(String message) {
-        // TODO: 实现广播消费逻辑
+        // 实现广播消费逻辑
         // 提示：所有接入这个消费组的实例都会收到同一条消息
         // 提示：适合刷新本地缓存、更新内存中的配置等场景
+        log.info("广播消费收到消息：{}", message);
     }
 }
